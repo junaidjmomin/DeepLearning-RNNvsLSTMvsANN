@@ -2,6 +2,8 @@
 
 ## Final project definition
 
+dataset: https://huggingface.co/datasets/ConvLab/dailydialog 
+
 ### **ContextNext: Comparative Next-Word Prediction using ANN, RNN and LSTM**
 
 **Problem statement:**  

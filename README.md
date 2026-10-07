@@ -1,4 +1,4 @@
-Yes. If the goal is **college mini-project + something genuinely worth discussing in placements**, I would build it as a small end-to-end ML product rather than three notebooks.
+
 
 ## Final project definition
 
@@ -1143,4 +1143,3 @@ Your final system should be:
                   Live Demo
 ```
 
-**I would target roughly 3 weeks for this version**, with the three people working in parallel. The biggest mistake would be spending the entire time tuning LSTM accuracy and leaving deployment, analysis and documentation until the last day. The end-to-end system is what gives this project its placement value.

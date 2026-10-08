@@ -1,19 +1,17 @@
-
-
 ## Final project definition
 
-dataset: https://huggingface.co/datasets/ConvLab/dailydialog 
+dataset: https://huggingface.co/datasets/ConvLab/dailydialog
 
-### **ContextNext: Comparative Next-Word Prediction using ANN, RNN and LSTM**
+### **ContextNext: Comparative Next-Word Prediction using GRU, RNN and LSTM**
 
 **Problem statement:**  
-Given the previous **N words** of a sentence, predict the next word and compare how ANN, Vanilla RNN and LSTM handle sequential context.
+Given the previous **N words** of a sentence, predict the next word and compare how GRU, Vanilla RNN and LSTM handle sequential context.
 
 **Primary dataset:** DailyDialog.
 
 **Core comparison:**
 
-- ANN
+- GRU
 - Vanilla RNN
 - LSTM
 
@@ -38,7 +36,7 @@ The addition of proper language-model metrics is important. MSE/MAE/RMSE can be 
 
 For now call yourselves:
 
-- **Person A — Data + ANN**
+- **Person A — Data + GRU**
 - **Person B — RNN + Evaluation**
 - **Person C — LSTM + Deployment**
 
@@ -46,7 +44,7 @@ The workload becomes roughly equal because each person owns **one model + one ma
 
 | Person | Model | Main engineering responsibility | Placement talking point |
 |---|---|---|---|
-| **A** | ANN | Dataset pipeline + preprocessing + testing | Data/ML pipeline |
+| **A** | GRU | Dataset pipeline + preprocessing + testing | Data/ML pipeline |
 | **B** | RNN | Experiment tracking + metrics + analysis | ML experimentation |
 | **C** | LSTM | API + frontend + Docker/deployment | ML engineering/deployment |
 
@@ -54,7 +52,7 @@ But there is one rule:
 
 > **Nobody should understand only their own part.**
 
-At the end, each member must be capable of explaining ANN, RNN, LSTM, preprocessing, metrics and deployment.
+At the end, each member must be capable of explaining GRU, RNN, LSTM, preprocessing, metrics and deployment.
 
 ---
 
@@ -75,7 +73,7 @@ contextnext/
 │
 ├── notebooks/
 │   ├── 01_eda.ipynb
-│   ├── 02_ann_experiments.ipynb
+│   ├── 02_gru_experiments.ipynb
 │   ├── 03_rnn_experiments.ipynb
 │   └── 04_lstm_experiments.ipynb
 │
@@ -86,7 +84,7 @@ contextnext/
 │   │   └── dataset.py
 │   │
 │   ├── models/
-│   │   ├── ann.py
+│   │   ├── gru.py
 │   │   ├── rnn.py
 │   │   └── lstm.py
 │   │
@@ -309,7 +307,7 @@ Suppose:
 
 ```text
 Baseline accuracy: 14%
-ANN:               24%
+GRU:               30%
 RNN:               31%
 LSTM:              36%
 ```
@@ -324,7 +322,7 @@ doesn't tell the interviewer whether 36% is impressive.
 
 ---
 
-# Phase 5 — Build ANN
+# Phase 5 — Build GRU
 
 ### Days 5–6 — Person A
 
@@ -335,38 +333,28 @@ Architecture:
      ↓
 Embedding
      ↓
-Flatten
+GRU
+     ↓
+Last hidden state
      ↓
 Dense
      ↓
-ReLU
-     ↓
-Dropout
-     ↓
-Dense
-     ↓
-Vocabulary Softmax
+Softmax
 ```
 
 Conceptually:
 
-```text
+```python
 Embedding(vocab_size, embedding_dim)
 
-Flatten()
-
-Linear(..., hidden_size)
-
-ReLU()
-
-Dropout()
+GRU(embedding_dim, hidden_size)
 
 Linear(hidden_size, vocab_size)
 ```
 
-ANN doesn't maintain a recurrent hidden state.
+GRU maintains a hidden state and uses **gates** to control what information should be retained or updated.
 
-That becomes your **non-sequential neural baseline**.
+It provides a simpler gated recurrent architecture compared with LSTM.
 
 Person A must document:
 
@@ -385,7 +373,7 @@ test metrics
 
 ### Days 5–6 — Person B
 
-In parallel with ANN.
+In parallel with GRU.
 
 Architecture:
 
@@ -435,12 +423,12 @@ Dense
 Softmax
 ```
 
-Try to keep hidden dimensions comparable to RNN.
+Try to keep hidden dimensions comparable to RNN and GRU.
 
 That gives you a fair:
 
 ```text
-ANN
+GRU
 vs
 RNN
 vs
@@ -460,7 +448,7 @@ This is extremely important.
 You don't want:
 
 ```text
-train_ann.py
+train_gru.py
 train_rnn_randomcode.py
 lstm_final_final2.py
 ```
@@ -468,14 +456,14 @@ lstm_final_final2.py
 Instead:
 
 ```bash
-python train.py --model ann
+python train.py --model gru
 python train.py --model rnn
 python train.py --model lstm
 ```
 
 Person B leads this.
 
-Person A integrates ANN.
+Person A integrates GRU.
 
 Person C integrates LSTM.
 
@@ -525,17 +513,7 @@ perplexity
 training duration
 ```
 
-MLflow is designed specifically to track parameters, metrics, models and artifacts across training runs. [MLflow AI Platform](https://www.mlflow.org/docs/latest/ml/getting-started/quickstart/?utm_source=chatgpt.com)
-
-Now instead of saying:
-
-> "We trained our models a few times."
-
-you can say:
-
-> "We tracked controlled experiments and compared model configurations using MLflow."
-
-That is much more placement-friendly.
+MLflow is designed specifically to track parameters, metrics, models and artifacts across training runs.
 
 ---
 
@@ -549,7 +527,7 @@ Everyone verifies their model.
 
 Create one final table:
 
-| Metric | ANN | RNN | LSTM |
+| Metric | GRU | RNN | LSTM |
 |---|---:|---:|---:|
 | Cross Entropy | | | |
 | Accuracy | | | |
@@ -596,7 +574,7 @@ That answer will sound far better than blindly claiming RMSE is the ideal metric
 
 Don't stop at:
 
-> ANN vs RNN vs LSTM.
+> "GRU vs RNN vs LSTM."
 
 Run:
 
@@ -608,7 +586,7 @@ Context length = 10
 
 Now test:
 
-| Context | ANN | RNN | LSTM |
+| Context | GRU | RNN | LSTM |
 |---|---:|---:|---:|
 | 3 words | | | |
 | 5 words | | | |
@@ -622,7 +600,7 @@ This is much more interesting academically.
 
 ### Division
 
-**Person A:** runs ANN context experiments.
+**Person A:** runs GRU context experiments.
 
 **Person B:** runs RNN context experiments.
 
@@ -655,7 +633,7 @@ Input:
 Actual:
 water
 
-ANN:
+GRU:
 milk
 
 RNN:
@@ -718,7 +696,7 @@ make     0.06
 The function should support all models:
 
 ```text
-ANN
+GRU
 RNN
 LSTM
 ```
@@ -760,13 +738,7 @@ Response:
 }
 ```
 
-FastAPI's current deployment documentation explicitly supports containerized deployment with Docker, so this is a reasonable production-style architecture rather than adding Docker only for show. [FastAPI](https://fastapi.tiangolo.com/deployment/docker/?utm_source=chatgpt.com)
-
-Now you can legitimately put:
-
-**REST API development**
-
-on the technologies involved.
+FastAPI's current deployment documentation explicitly supports containerized deployment with Docker, so this is a reasonable production-style architecture rather than adding Docker only for show.
 
 ---
 
@@ -776,14 +748,12 @@ on the technologies involved.
 
 Use **Streamlit**.
 
-Streamlit is specifically intended for interactive Python data/ML applications, and its current documentation supports straightforward public deployment. [Streamlit Docs](https://docs.streamlit.io/get-started/tutorials/create-an-app?utm_source=chatgpt.com)
-
 Your UI should look roughly like:
 
 ```text
 ╔══════════════════════════════════════════╗
 ║             ContextNext                  ║
-║ ANN vs RNN vs LSTM Next Word Predictor   ║
+║ GRU vs RNN vs LSTM Next Word Predictor   ║
 ╚══════════════════════════════════════════╝
 
 
@@ -797,7 +767,7 @@ Context length:  [5]
                  PREDICT
 
 
-           ANN         RNN         LSTM
+           GRU         RNN         LSTM
            ───         ───         ────
 1. school  28%     market 41%      market 62%
 2. office  19%     school 26%      school 21%
@@ -833,7 +803,7 @@ Tokenization
    ↓
 Word IDs
    ↓
-ANN / RNN / LSTM
+GRU / RNN / LSTM
    ↓
 Softmax
    ↓
@@ -878,8 +848,6 @@ docker compose up
 
 and launch the entire project is a strong engineering improvement.
 
-FastAPI's documentation recommends containers as a common deployment approach, and Streamlit also documents Docker deployment. [FastAPI](https://fastapi.tiangolo.com/deployment/docker/?utm_source=chatgpt.com)
-
 ---
 
 # Phase 17 — Deploy it publicly
@@ -890,7 +858,7 @@ Use either:
 
 or a container-based platform.
 
-Streamlit Community Cloud can deploy directly from a GitHub repository. [Streamlit Docs](https://docs.streamlit.io/get-started/tutorials/create-an-app?utm_source=chatgpt.com)
+Streamlit Community Cloud can deploy directly from a GitHub repository.
 
 Your GitHub README should then contain:
 
@@ -919,7 +887,7 @@ Demo GIF
 
 Problem statement
 
-Why ANN vs RNN vs LSTM?
+Why GRU vs RNN vs LSTM?
 
 Dataset
 
@@ -978,7 +946,7 @@ Divide chapters:
 Dataset
 EDA
 Preprocessing
-ANN architecture
+GRU architecture
 ```
 
 ### Person B
@@ -1020,24 +988,24 @@ Each team member should be able to answer these without notes:
 
 1. Why next-word prediction?
 2. Why DailyDialog?
-3. Why ANN as a baseline?
+3. Why GRU?
 4. Why does an RNN understand sequence order?
 5. What problem does LSTM solve?
 6. What are vanishing gradients?
-7. What are LSTM's input, forget and output gates?
-8. Why softmax?
-9. Why cross-entropy?
-10. Why isn't RMSE sufficient?
-11. What is perplexity?
-12. Why Top-3 accuracy?
-13. Why fixed context length?
-14. How did you prevent data leakage?
-15. Why use train/validation/test separately?
+7. How does GRU use gates?
+8. What are LSTM's input, forget and output gates?
+9. Why softmax?
+10. Why cross-entropy?
+11. Why isn't RMSE sufficient?
+12. What is perplexity?
+13. Why Top-3 accuracy?
+14. Why fixed context length?
+15. How did you prevent data leakage?
 16. What happens to unknown words?
 17. Why shouldn't stopwords be removed?
 18. How does your inference API work?
 19. How does Docker help?
-20. Why did LSTM outperform/not outperform RNN?
+20. Why did LSTM outperform/not outperform RNN or GRU?
 21. What would happen with Transformers?
 22. How would you scale the system?
 23. What are your project's limitations?
@@ -1056,19 +1024,19 @@ This is what I would actually put in your internal project tracker.
 | Dataset acquisition | **Lead** | Assist | Assist |
 | EDA | **Lead** | Assist | — |
 | Preprocessing | **Lead** | Review | Review |
-| ANN | **Lead** | Review | Review |
+| GRU | **Lead** | Review | Review |
 | RNN | Review | **Lead** | Review |
 | LSTM | Review | Review | **Lead** |
 | Baseline | Assist | **Lead** | — |
 | Metrics | Review | **Lead** | Review |
 | MLflow | Assist | **Lead** | Assist |
-| Context experiments | ANN | RNN | LSTM |
-| Error analysis | ANN | RNN | LSTM |
+| Context experiments | GRU | RNN | LSTM |
+| Error analysis | GRU | RNN | LSTM |
 | API | Review | Assist | **Lead** |
 | Streamlit | Assist | Review | **Lead** |
 | Docker | **Lead** | Review | **Lead** |
 | Testing | **Lead** | Assist | Assist |
-| Results/report | Dataset/ANN | **Results/RNN** | App/LSTM |
+| Results/report | Dataset/GRU | **Results/RNN** | App/LSTM |
 | README | **Lead** | Assist | Assist |
 | Demo video | Assist | Assist | **Lead** |
 | Final presentation | ⅓ | ⅓ | ⅓ |
@@ -1082,16 +1050,16 @@ That's fairly balanced.
 Don't write:
 
 > **Next Word Prediction Using LSTM**  
-> Made ANN, RNN and LSTM models and compared them.
+> Made GRU, RNN and LSTM models and compared them.
 
 Write something closer to:
 
 > **ContextNext — Neural Next-Word Prediction System**  
-> Built and benchmarked ANN, Vanilla RNN and LSTM language models on conversational text using a reproducible NLP pipeline; evaluated Top-1/Top-3 accuracy, perplexity and error metrics across varying context lengths. Developed an interactive inference application with FastAPI and Streamlit, tracked experiments using MLflow, and containerized the system with Docker.
+> Built and benchmarked GRU, Vanilla RNN and LSTM language models on conversational text using a reproducible NLP pipeline; evaluated Top-1/Top-3 accuracy, perplexity and error metrics across varying context lengths. Developed an interactive inference application with FastAPI and Streamlit, tracked experiments using MLflow, and containerized the system with Docker.
 
 Once you have your real results, improve it further:
 
-> LSTM improved Top-3 accuracy by **X%** over ANN while maintaining **Y ms** inference latency.
+> LSTM improved Top-3 accuracy by **X%** over GRU while maintaining **Y ms** inference latency.
 
 Numbers make résumé bullets considerably stronger.
 
@@ -1099,7 +1067,7 @@ Numbers make résumé bullets considerably stronger.
 
 ## What turns this from a normal mini-project into a placement project
 
-Don't add GRU, Transformers, attention, BERT and ten other models just to increase complexity.
+Don't add Transformers, attention, BERT and ten other models just to increase complexity.
 
 The high-value additions are:
 
@@ -1121,7 +1089,7 @@ Your final system should be:
                        │
            ┌───────────┼───────────┐
            ▼           ▼           ▼
-          ANN         RNN         LSTM
+          GRU         RNN         LSTM
            │           │           │
            └───────────┼───────────┘
                        ▼
@@ -1144,4 +1112,3 @@ Your final system should be:
                        ▼
                   Live Demo
 ```
-
